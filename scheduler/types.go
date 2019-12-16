@@ -1,11 +1,12 @@
 package scheduler
 
 import (
-	"gaeadb/cache"
-	"gaeadb/data"
-	"gaeadb/scheduler/manager"
-	"gaeadb/wal"
 	"time"
+
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/data"
+	"github.com/infinivision/gaeadb/scheduler/manager"
+	"github.com/infinivision/gaeadb/wal"
 )
 
 const (

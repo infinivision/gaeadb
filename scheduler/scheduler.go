@@ -2,15 +2,16 @@ package scheduler
 
 import (
 	"encoding/binary"
-	"gaeadb/cache"
-	"gaeadb/constant"
-	"gaeadb/data"
-	"gaeadb/errmsg"
-	"gaeadb/scheduler/manager"
-	"gaeadb/wal"
 	"sort"
 	"sync/atomic"
 	"time"
+
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/data"
+	"github.com/infinivision/gaeadb/errmsg"
+	"github.com/infinivision/gaeadb/scheduler/manager"
+	"github.com/infinivision/gaeadb/wal"
 )
 
 func New(ts uint64, d data.Data, c cache.Cache, w wal.Writer) *scheduler {

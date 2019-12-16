@@ -1,8 +1,6 @@
 package scheduler
 
-import (
-	"gaeadb/disk"
-)
+import "github.com/infinivision/gaeadb/disk"
 
 type Scheduler interface {
 	Close() error

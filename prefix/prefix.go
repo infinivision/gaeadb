@@ -2,12 +2,13 @@ package prefix
 
 import (
 	"encoding/binary"
-	"gaeadb/cache"
-	"gaeadb/constant"
-	"gaeadb/errmsg"
-	"gaeadb/locker"
-	"gaeadb/stack"
-	"gaeadb/suffix"
+
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/errmsg"
+	"github.com/infinivision/gaeadb/locker"
+	"github.com/infinivision/gaeadb/stack"
+	"github.com/infinivision/gaeadb/suffix"
 )
 
 func New(c cache.Cache, t locker.Table) *tree {

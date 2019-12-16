@@ -1,8 +1,8 @@
 package mvcc
 
 import (
-	"gaeadb/prefix"
-	"gaeadb/suffix"
+	"github.com/infinivision/gaeadb/prefix"
+	"github.com/infinivision/gaeadb/suffix"
 )
 
 type MVCC interface {
@@ -27,11 +27,17 @@ type Iterator interface {
 
 type forwardIterator struct {
 	ts  uint64
+	ks  [][]byte
+	vs  []uint64
+	tss []uint64
 	itr prefix.Iterator
 }
 
 type backwardIterator struct {
 	ts  uint64
+	ks  [][]byte
+	vs  []uint64
+	tss []uint64
 	itr prefix.Iterator
 }
 

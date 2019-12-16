@@ -1,8 +1,8 @@
 package scheduler
 
 import (
-	"gaeadb/constant"
-	"gaeadb/disk"
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/disk"
 )
 
 func New(d disk.Disk) *scheduler {

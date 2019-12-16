@@ -9,6 +9,7 @@ var (
 const (
 	Cancel = iota // must be zero
 	Delete
+	Empty
 )
 
 const (

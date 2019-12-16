@@ -2,12 +2,12 @@ package cache
 
 import (
 	"container/list"
-	"gaeadb/cache/scheduler"
-	"gaeadb/disk"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/infinivision/gaeadb/cache/scheduler"
+	"github.com/infinivision/gaeadb/disk"
 	"github.com/nnsgmsone/damrey/logger"
 )
 

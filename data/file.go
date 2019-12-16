@@ -2,9 +2,10 @@ package data
 
 import (
 	"encoding/binary"
-	"gaeadb/constant"
-	"gaeadb/errmsg"
 	"os"
+
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/errmsg"
 )
 
 func (f *file) close() error {

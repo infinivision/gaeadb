@@ -2,11 +2,12 @@ package wal
 
 import (
 	"encoding/binary"
-	"gaeadb/sum"
 	"hash/crc32"
 	"os"
 	"sync/atomic"
 	"syscall"
+
+	"github.com/infinivision/gaeadb/sum"
 )
 
 func (w *walWriter) Close() error {
