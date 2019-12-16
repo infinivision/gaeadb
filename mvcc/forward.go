@@ -48,5 +48,5 @@ func (itr *forwardIterator) seek() error {
 			return err
 		}
 	}
-	return nil
+	return errmsg.ScanEnd
 }

@@ -14,9 +14,8 @@ const (
 const (
 	MaxKeySize         = 4074
 	MaxValueSize       = 1 << 16 // 64KB
-	MaxDataFileSize    = 1 << 32 // 4GB - avoiding the use of triple-indirect blocks
 	MaxTransactionSize = 1 << 26 // 64MB
-	//MaxDataFileSize = 1 << 40 // 1TB
+	MaxDataFileSize    = 1 << 40 // 1TB
 )
 
 const (
