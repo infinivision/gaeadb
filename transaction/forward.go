@@ -2,9 +2,10 @@ package transaction
 
 import (
 	"bytes"
-	"gaeadb/constant"
-	"gaeadb/errmsg"
 	"sort"
+
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/errmsg"
 )
 
 func (itr *forwardIterator) Close() error {
@@ -60,9 +61,12 @@ func (itr *forwardIterator) Value() ([]byte, error) {
 		}
 		return v, nil
 	}
-	if v := itr.itr.Value(); v == constant.Delete {
+	switch v := itr.itr.Value(); v {
+	case constant.Empty:
+		return []byte{}, nil
+	case constant.Delete:
 		return nil, errmsg.NotExist
-	} else {
+	default:
 		return itr.tx.d.Read(v)
 	}
 }

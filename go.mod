@@ -1,4 +1,4 @@
-module gaeadb
+module github.com/infinivision/gaeadb
 
 go 1.13
 

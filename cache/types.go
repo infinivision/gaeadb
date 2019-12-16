@@ -2,9 +2,10 @@ package cache
 
 import (
 	"container/list"
-	"gaeadb/cache/scheduler"
-	"gaeadb/disk"
 	"sync"
+
+	"github.com/infinivision/gaeadb/cache/scheduler"
+	"github.com/infinivision/gaeadb/disk"
 )
 
 const (

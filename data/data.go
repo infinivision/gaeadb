@@ -3,8 +3,9 @@ package data
 import (
 	"encoding/binary"
 	"fmt"
-	"gaeadb/errmsg"
 	"os"
+
+	"github.com/infinivision/gaeadb/errmsg"
 )
 
 func New(dir string) (*data, error) {

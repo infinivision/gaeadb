@@ -1,10 +1,10 @@
 package prefix
 
 import (
-	"gaeadb/cache"
-	"gaeadb/locker"
-	"gaeadb/stack"
-	"gaeadb/suffix"
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/locker"
+	"github.com/infinivision/gaeadb/stack"
+	"github.com/infinivision/gaeadb/suffix"
 )
 
 const (

@@ -1,15 +1,15 @@
 package db
 
 import (
-	"gaeadb/cache"
-	"gaeadb/data"
-	"gaeadb/mvcc"
-	"gaeadb/scheduler"
-	"gaeadb/transaction"
-	"gaeadb/wal"
 	"io"
 	"time"
 
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/data"
+	"github.com/infinivision/gaeadb/mvcc"
+	"github.com/infinivision/gaeadb/scheduler"
+	"github.com/infinivision/gaeadb/transaction"
+	"github.com/infinivision/gaeadb/wal"
 	"github.com/nnsgmsone/damrey/logger"
 )
 

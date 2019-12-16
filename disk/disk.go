@@ -2,11 +2,12 @@ package disk
 
 import (
 	"encoding/binary"
-	"gaeadb/constant"
-	"gaeadb/errmsg"
 	"math"
 	"os"
 	"sync/atomic"
+
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/errmsg"
 )
 
 func New(path string) (*disk, error) {

@@ -2,7 +2,8 @@ package suffix
 
 import (
 	"bytes"
-	"gaeadb/cache"
+
+	"github.com/infinivision/gaeadb/cache"
 )
 
 const (

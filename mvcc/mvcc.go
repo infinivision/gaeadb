@@ -2,10 +2,11 @@ package mvcc
 
 import (
 	"encoding/binary"
-	"gaeadb/constant"
-	"gaeadb/errmsg"
-	"gaeadb/prefix"
-	"gaeadb/suffix"
+
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/errmsg"
+	"github.com/infinivision/gaeadb/prefix"
+	"github.com/infinivision/gaeadb/suffix"
 )
 
 func New(t prefix.Tree) *mvcc {
@@ -52,7 +53,7 @@ func (m *mvcc) NewForwardIterator(pref []byte, ts uint64) (Iterator, error) {
 	if err != nil {
 		return nil, err
 	}
-	itr := &forwardIterator{ts, fItr}
+	itr := &forwardIterator{ts: ts, itr: fItr}
 	if err := itr.seek(); err != nil {
 		itr.Close()
 		return nil, err
@@ -65,7 +66,7 @@ func (m *mvcc) NewBackwardIterator(pref []byte, ts uint64) (Iterator, error) {
 	if err != nil {
 		return nil, err
 	}
-	itr := &backwardIterator{ts, bItr}
+	itr := &backwardIterator{ts: ts, itr: bItr}
 	if err := itr.seek(); err != nil {
 		itr.Close()
 		return nil, err

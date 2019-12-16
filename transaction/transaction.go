@@ -3,14 +3,14 @@ package transaction
 import (
 	"bytes"
 	"encoding/binary"
-	"gaeadb/constant"
-	"gaeadb/data"
-	"gaeadb/errmsg"
-	"gaeadb/mvcc"
-	"gaeadb/scheduler"
-	"gaeadb/wal"
 	"sync/atomic"
 
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/data"
+	"github.com/infinivision/gaeadb/errmsg"
+	"github.com/infinivision/gaeadb/mvcc"
+	"github.com/infinivision/gaeadb/scheduler"
+	"github.com/infinivision/gaeadb/wal"
 	"github.com/nnsgmsone/damrey/logger"
 )
 
@@ -72,13 +72,21 @@ func (tx *transaction) Commit() error {
 		}
 	}
 	{
-		log = log[:9+4+cnt*8]
+		if len(log) < 9+4+cnt*8 {
+			log = make([]byte, 9+4+cnt*8)
+		} else {
+			log = log[:9+4+cnt*8]
+		}
 		log[0] = wal.WD
 		binary.LittleEndian.PutUint64(log[1:], tx.wts)
 		binary.LittleEndian.PutUint32(log[9:], uint32(cnt))
 		i := 13
 		for k, v := range tx.wmp {
-			if len(v) == 0 {
+			switch {
+			case v == nil:
+				continue
+			case len(v) == 0:
+				ks = append(ks, k)
 				continue
 			}
 			if o, err := tx.d.Alloc(v); err != nil {
@@ -99,6 +107,10 @@ func (tx *transaction) Commit() error {
 		case tx.wmp[k] == nil:
 			if err := tx.m.Set([]byte(k), constant.Delete, tx.wts, &walWriter{tx.wts, tx.w}); err != nil {
 				tx.log.Fatalf("transaction del '%s' failed: %v\n", k, err)
+			}
+		case len(tx.wmp[k]) == 0:
+			if err := tx.m.Set([]byte(k), constant.Empty, tx.wts, &walWriter{tx.wts, tx.w}); err != nil {
+				tx.log.Fatalf("transaction set '%s' failed: %v\n", k, err)
 			}
 		default:
 			if err := tx.d.Write(os[0], tx.wmp[k]); err != nil {
@@ -151,11 +163,7 @@ func (tx *transaction) Set(k, v []byte) error {
 	if tx.s += 4 + len(k) + len(v); tx.s > constant.MaxTransactionSize {
 		return errmsg.OutOfSpace
 	}
-	if len(v) > 0 {
-		tx.wmp[string(k)] = v
-	} else {
-		tx.wmp[string(k)] = nil
-	}
+	tx.wmp[string(k)] = v
 	return nil
 }
 
@@ -173,11 +181,17 @@ func (tx *transaction) Get(k []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if v, err := tx.d.Read(o); err != nil {
-		return nil, err
-	} else {
+	switch {
+	case o != constant.Empty:
+		if v, err := tx.d.Read(o); err != nil {
+			return nil, err
+		} else {
+			tx.rmp[string(k)] = ts
+			return v, nil
+		}
+	default:
 		tx.rmp[string(k)] = ts
-		return v, nil
+		return []byte{}, nil
 	}
 }
 

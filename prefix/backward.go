@@ -2,9 +2,10 @@ package prefix
 
 import (
 	"encoding/binary"
-	"gaeadb/cache"
-	"gaeadb/constant"
-	"gaeadb/suffix"
+
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/suffix"
 )
 
 func (itr *backwardIterator) Close() error {

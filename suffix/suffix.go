@@ -3,9 +3,10 @@ package suffix
 import (
 	"bytes"
 	"encoding/binary"
-	"gaeadb/cache"
-	"gaeadb/constant"
 	"sort"
+
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/constant"
 )
 
 func Find(k []byte, buf []byte) uint64 {

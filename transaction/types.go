@@ -2,11 +2,11 @@ package transaction
 
 import (
 	"encoding/binary"
-	"gaeadb/data"
-	"gaeadb/mvcc"
-	"gaeadb/scheduler"
-	"gaeadb/wal"
 
+	"github.com/infinivision/gaeadb/data"
+	"github.com/infinivision/gaeadb/mvcc"
+	"github.com/infinivision/gaeadb/scheduler"
+	"github.com/infinivision/gaeadb/wal"
 	"github.com/nnsgmsone/damrey/logger"
 )
 

@@ -2,14 +2,14 @@ package wal
 
 import (
 	"encoding/binary"
-	"gaeadb/cache"
-	"gaeadb/constant"
-	"gaeadb/data"
-	"gaeadb/mvcc"
-	"gaeadb/sum"
 	"hash/crc32"
 	"os"
 
+	"github.com/infinivision/gaeadb/cache"
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/data"
+	"github.com/infinivision/gaeadb/mvcc"
+	"github.com/infinivision/gaeadb/sum"
 	"golang.org/x/sys/unix"
 )
 

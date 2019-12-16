@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"gaeadb/db"
 	"log"
+
+	"github.com/infinivision/gaeadb/db"
 )
 
 func main() {

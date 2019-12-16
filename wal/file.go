@@ -2,11 +2,11 @@ package wal
 
 import (
 	"encoding/binary"
-	"gaeadb/constant"
-	"gaeadb/errmsg"
-	"gaeadb/sum"
 	"hash/crc32"
 
+	"github.com/infinivision/gaeadb/constant"
+	"github.com/infinivision/gaeadb/errmsg"
+	"github.com/infinivision/gaeadb/sum"
 	"golang.org/x/sys/unix"
 )
 
