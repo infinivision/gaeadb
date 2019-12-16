@@ -17,10 +17,6 @@ The goal of the project is to project a database engine for sql.
 The top-level object in gaeadb is a `DB`. It represents multiple files on disk
 in specific directories, which contain the data for a single database.
 
-To open your database, use the `db.Open()` function, with the appropriate
-options. The `Dir` options are mandatory and must be
-specified by the client. They can be set to the same value to simplify things.
-
 ```go
 package main
 
