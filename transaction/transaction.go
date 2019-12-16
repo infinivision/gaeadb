@@ -78,7 +78,7 @@ func (tx *transaction) Commit() error {
 		binary.LittleEndian.PutUint32(log[9:], uint32(cnt))
 		i := 13
 		for k, v := range tx.wmp {
-			if v == nil {
+			if len(v) == 0 {
 				continue
 			}
 			if o, err := tx.d.Alloc(v); err != nil {
@@ -145,10 +145,17 @@ func (tx *transaction) Set(k, v []byte) error {
 	if len(k) > constant.MaxKeySize {
 		return errmsg.KeyTooLong
 	}
+	if len(v) > constant.MaxValueSize {
+		return errmsg.ValTooLong
+	}
 	if tx.s += 4 + len(k) + len(v); tx.s > constant.MaxTransactionSize {
 		return errmsg.OutOfSpace
 	}
-	tx.wmp[string(k)] = v
+	if len(v) > 0 {
+		tx.wmp[string(k)] = v
+	} else {
+		tx.wmp[string(k)] = nil
+	}
 	return nil
 }
 
