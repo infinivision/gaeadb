@@ -82,6 +82,8 @@ I have run comprehensive benchmarks against Bolt and Badger, The
 benchmarking code, and the detailed logs for the benchmarks can be found in the
 [gaeadbBench] repo.
 
+[gaeadbBench]: https://github.com/infinivision/gaeadbBench
+
 ## Caveats & Limitations
 
 ### Caveats
