@@ -96,12 +96,11 @@ func (s *scheduler) process(m *message) {
 		for k, _ := range m.wmp {
 			if e, ok := s.mp[k]; ok {
 				e.ts = ts
-				copy(s.xs[e.i+1:], s.xs[e.i:])
-				e.i, s.xs = push(e, s.xs)
+				iSort(s.xs)
 			} else {
 				e = &element{k: k, ts: ts}
 				s.mp[k] = e
-				e.i, s.xs = push(e, s.xs)
+				s.xs = push(e, s.xs)
 			}
 		}
 		if s.mgr.Del(m.ts) {
@@ -162,10 +161,26 @@ func (c *checkpoint) startCKPT() error {
 	return c.w.Append(log)
 }
 
-func push(x *element, xs []*element) (int, []*element) {
-	i := sort.Search(len(xs), func(i int) bool { return xs[i].ts >= x.ts })
+func push(x *element, xs []*element) []*element {
+	o := sort.Search(len(xs), func(i int) bool { return xs[i].ts >= x.ts })
 	xs = append(xs, &element{})
-	copy(xs[i+1:], xs[i:])
-	xs[i] = x
-	return i, xs
+	copy(xs[o+1:], xs[o:])
+	xs[o] = x
+	return xs
+}
+
+func iSort(xs []*element) {
+	n := len(xs)
+	if n < 2 {
+		return
+	}
+	for i := 1; i < n; i++ {
+		for j := i - 1; j >= 0; j-- {
+			if xs[j].ts > xs[j+1].ts {
+				xs[j], xs[j+1] = xs[j+1], xs[j]
+			} else {
+				break
+			}
+		}
+	}
 }

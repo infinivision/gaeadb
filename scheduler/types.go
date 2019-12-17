@@ -49,7 +49,6 @@ type message struct {
 }
 
 type element struct {
-	i  int
 	k  string
 	ts uint64
 }
