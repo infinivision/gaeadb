@@ -78,6 +78,10 @@ type Iterator interface {
 
 ## Benchmarks
 
+I have run comprehensive benchmarks against Bolt and Badger, The
+benchmarking code, and the detailed logs for the benchmarks can be found in the
+[gaeadbBench] repo.
+
 ## Caveats & Limitations
 
 ### Caveats
