@@ -47,12 +47,6 @@ func (tx *transaction) Commit() error {
 	if err != nil {
 		return err
 	}
-	{
-		if err := tx.schd.Done(tx.wts); err != nil {
-			tx.log.Fatalf("transaction done failed: %v\n", err)
-		}
-	}
-	return nil
 	cnt := 0
 	log := make([]byte, tx.s)
 	{ // commit
