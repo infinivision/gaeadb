@@ -25,11 +25,13 @@ func NewForwardIterator(ks [][]byte, vs []uint64, prefix []byte, pg cache.Page) 
 	for i := 0; i < len(ks); i++ {
 		es = push(&element{vs[i], ks[i]}, es)
 	}
-	for len(es) > 0 {
-		if bytes.HasPrefix(es[0].suff, prefix) {
-			break
+	if len(prefix) > 0 {
+		for len(es) > 0 {
+			if bytes.HasPrefix(es[0].suff, prefix) {
+				break
+			}
+			es = es[1:]
 		}
-		es = es[1:]
 	}
 	return &forwardIterator{prefix, es}
 }
@@ -39,11 +41,13 @@ func NewBackwardIterator(ks [][]byte, vs []uint64, prefix []byte, pg cache.Page)
 	for i := 0; i < len(ks); i++ {
 		es = push(&element{vs[i], ks[i]}, es)
 	}
-	for len(es) > 0 {
-		if bytes.HasPrefix(es[len(es)-1].suff, prefix) {
-			break
+	if len(prefix) > 0 {
+		for len(es) > 0 {
+			if bytes.HasPrefix(es[len(es)-1].suff, prefix) {
+				break
+			}
+			es = es[:len(es)-1]
 		}
-		es = es[:len(es)-1]
 	}
 	return &backwardIterator{prefix, es}
 }

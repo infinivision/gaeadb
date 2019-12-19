@@ -8,6 +8,9 @@ func (itr *backwardIterator) Next() {
 		if len(itr.es) == 0 {
 			return
 		}
+		if len(itr.prefix) == 0 {
+			return
+		}
 		if bytes.HasPrefix(itr.es[len(itr.es)-1].suff, itr.prefix) {
 			return
 		}

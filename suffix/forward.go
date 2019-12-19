@@ -10,6 +10,9 @@ func (itr *forwardIterator) Next() {
 		if len(itr.es) == 0 {
 			return
 		}
+		if len(itr.prefix) == 0 {
+			return
+		}
 		if bytes.HasPrefix(itr.es[0].suff, itr.prefix) {
 			return
 		}
