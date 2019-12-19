@@ -91,7 +91,7 @@ func (t *tree) NewForwardIterator(pref []byte) (Iterator, error) {
 			return nil, err
 		}
 	}
-	itr := &forwardIterator{t, s}
+	itr := &forwardIterator{t: t, s: s}
 	if err := itr.seek(); err != nil {
 		itr.Close()
 		return nil, err
@@ -117,7 +117,7 @@ func (t *tree) NewBackwardIterator(pref []byte) (Iterator, error) {
 			return nil, err
 		}
 	}
-	itr := &backwardIterator{t, s}
+	itr := &backwardIterator{t: t, s: s}
 	if err := itr.seek(); err != nil {
 		itr.Close()
 		return nil, err

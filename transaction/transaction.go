@@ -14,12 +14,13 @@ import (
 	"github.com/nnsgmsone/damrey/logger"
 )
 
-func New(d data.Data, m mvcc.MVCC, w wal.Writer, log logger.Log, schd scheduler.Scheduler) *transaction {
+func New(ro bool, d data.Data, m mvcc.MVCC, w wal.Writer, log logger.Log, schd scheduler.Scheduler) *transaction {
 	return &transaction{
 		s:    13, // timestamp size + one byte + key's number
 		d:    d,
 		m:    m,
 		w:    w,
+		ro:   ro,
 		log:  log,
 		schd: schd,
 		rts:  schd.Start(),
@@ -40,7 +41,10 @@ func (tx *transaction) Commit() error {
 	var os []uint64
 	var ks []string
 
-	if del(&tx.n) >= 0 {
+	switch {
+	case tx.ro:
+		return errmsg.ReadOnlyTransaction
+	case del(&tx.n) >= 0:
 		return nil
 	}
 	tx.wts, err = tx.schd.Commit(tx.rts, tx.rmp, tx.wmp)
@@ -137,10 +141,12 @@ func (tx *transaction) Commit() error {
 }
 
 func (tx *transaction) Del(k []byte) error {
-	if len(k) == 0 {
+	switch {
+	case tx.ro:
+		return errmsg.ReadOnlyTransaction
+	case len(k) == 0:
 		return errmsg.KeyIsEmpty
-	}
-	if len(k) > constant.MaxKeySize {
+	case len(k) > constant.MaxKeySize:
 		return errmsg.KeyTooLong
 	}
 	if tx.s += 4 + len(k); tx.s > constant.MaxTransactionSize {
@@ -151,13 +157,14 @@ func (tx *transaction) Del(k []byte) error {
 }
 
 func (tx *transaction) Set(k, v []byte) error {
-	if len(k) == 0 {
+	switch {
+	case tx.ro:
+		return errmsg.ReadOnlyTransaction
+	case len(k) == 0:
 		return errmsg.KeyIsEmpty
-	}
-	if len(k) > constant.MaxKeySize {
+	case len(k) > constant.MaxKeySize:
 		return errmsg.KeyTooLong
-	}
-	if len(v) > constant.MaxValueSize {
+	case len(v) > constant.MaxValueSize:
 		return errmsg.ValTooLong
 	}
 	if tx.s += 4 + len(k) + len(v); tx.s > constant.MaxTransactionSize {
@@ -171,11 +178,13 @@ func (tx *transaction) Get(k []byte) ([]byte, error) {
 	if len(k) == 0 {
 		return nil, errmsg.KeyIsEmpty
 	}
-	if v, ok := tx.wmp[string(k)]; ok {
-		if v == nil {
-			return nil, errmsg.NotExist
+	if !tx.ro {
+		if v, ok := tx.wmp[string(k)]; ok {
+			if v == nil {
+				return nil, errmsg.NotExist
+			}
+			return v, nil
 		}
-		return v, nil
 	}
 	o, ts, err := tx.m.Get(k, tx.rts)
 	if err != nil {
@@ -186,11 +195,15 @@ func (tx *transaction) Get(k []byte) ([]byte, error) {
 		if v, err := tx.d.Read(o); err != nil {
 			return nil, err
 		} else {
-			tx.rmp[string(k)] = ts
+			if !tx.ro {
+				tx.rmp[string(k)] = ts
+			}
 			return v, nil
 		}
 	default:
-		tx.rmp[string(k)] = ts
+		if !tx.ro {
+			tx.rmp[string(k)] = ts
+		}
 		return []byte{}, nil
 	}
 }
@@ -199,17 +212,20 @@ func (tx *transaction) NewForwardIterator(pref []byte) (Iterator, error) {
 	if itr, err := tx.m.NewForwardIterator(pref, tx.rts); err != nil {
 		return nil, err
 	} else {
-		var ks [][]byte
-		key := string(itr.Key())
-		for k, _ := range tx.wmp {
-			if bytes.Compare([]byte(k), []byte(key)) < 0 {
-				ks = LtPush([]byte(k), ks)
+		if !tx.ro {
+			var ks [][]byte
+			key := string(itr.Key())
+			for k, _ := range tx.wmp {
+				if bytes.Compare([]byte(k), []byte(key)) < 0 {
+					ks = LtPush([]byte(k), ks)
+				}
 			}
+			if _, ok := tx.wmp[key]; !ok {
+				tx.rmp[key] = itr.Timestamp()
+			}
+			return &forwardIterator{ks, tx, itr}, nil
 		}
-		if _, ok := tx.wmp[key]; !ok {
-			tx.rmp[key] = itr.Timestamp()
-		}
-		return &forwardIterator{ks, tx, itr}, nil
+		return &forwardIterator{nil, tx, itr}, nil
 	}
 }
 
@@ -217,17 +233,20 @@ func (tx *transaction) NewBackwardIterator(pref []byte) (Iterator, error) {
 	if itr, err := tx.m.NewBackwardIterator(pref, tx.rts); err != nil {
 		return nil, err
 	} else {
-		var ks [][]byte
-		key := string(itr.Key())
-		for k, _ := range tx.wmp {
-			if bytes.Compare([]byte(k), []byte(key)) > 0 {
-				ks = GtPush([]byte(k), ks)
+		if !tx.ro {
+			var ks [][]byte
+			key := string(itr.Key())
+			for k, _ := range tx.wmp {
+				if bytes.Compare([]byte(k), []byte(key)) > 0 {
+					ks = GtPush([]byte(k), ks)
+				}
 			}
+			if _, ok := tx.wmp[key]; !ok {
+				tx.rmp[key] = itr.Timestamp()
+			}
+			return &backwardIterator{ks, tx, itr}, nil
 		}
-		if _, ok := tx.wmp[key]; !ok {
-			tx.rmp[key] = itr.Timestamp()
-		}
-		return &backwardIterator{ks, tx, itr}, nil
+		return &backwardIterator{nil, tx, itr}, nil
 	}
 }
 

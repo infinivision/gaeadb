@@ -14,4 +14,5 @@ var (
 	OutOfSpace          = errors.New("out of space")
 	UnknownError        = errors.New("unknown error")
 	TransactionConflict = errors.New("transaction conflict")
+	ReadOnlyTransaction = errors.New("read-only transaction")
 )

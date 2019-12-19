@@ -23,7 +23,7 @@ type DB interface {
 	Set([]byte, []byte) error
 	Get([]byte) ([]byte, error)
 
-	NewTransaction() (transaction.Transaction, error)
+	NewTransaction(bool) (transaction.Transaction, error)
 }
 
 type Config struct {

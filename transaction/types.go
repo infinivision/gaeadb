@@ -41,7 +41,8 @@ type backwardIterator struct {
 }
 
 type transaction struct {
-	s    int // transaction size
+	s    int  // transaction size
+	ro   bool // read only
 	n    int32
 	rts  uint64 // read timestamp
 	wts  uint64 // write timestamp

@@ -72,7 +72,7 @@ func (db *db) Close() error {
 }
 
 func (db *db) Del(k []byte) error {
-	tx := transaction.New(db.d, db.m, db.w, db.log, db.schd)
+	tx := transaction.New(false, db.d, db.m, db.w, db.log, db.schd)
 	defer tx.Rollback()
 	if err := tx.Del(k); err != nil {
 		return err
@@ -81,7 +81,7 @@ func (db *db) Del(k []byte) error {
 }
 
 func (db *db) Set(k, v []byte) error {
-	tx := transaction.New(db.d, db.m, db.w, db.log, db.schd)
+	tx := transaction.New(false, db.d, db.m, db.w, db.log, db.schd)
 	defer tx.Rollback()
 	if err := tx.Set(k, v); err != nil {
 		return err
@@ -90,7 +90,7 @@ func (db *db) Set(k, v []byte) error {
 }
 
 func (db *db) Get(k []byte) ([]byte, error) {
-	tx := transaction.New(db.d, db.m, db.w, db.log, db.schd)
+	tx := transaction.New(true, db.d, db.m, db.w, db.log, db.schd)
 	defer tx.Rollback()
 	if v, err := tx.Get(k); err != nil {
 		return nil, err
@@ -99,8 +99,8 @@ func (db *db) Get(k []byte) ([]byte, error) {
 	}
 }
 
-func (db *db) NewTransaction() (transaction.Transaction, error) {
-	return transaction.New(db.d, db.m, db.w, db.log, db.schd), nil
+func (db *db) NewTransaction(ro bool) (transaction.Transaction, error) {
+	return transaction.New(ro, db.d, db.m, db.w, db.log, db.schd), nil
 }
 
 func checkDir(dir string) error {

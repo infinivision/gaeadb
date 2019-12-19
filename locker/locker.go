@@ -151,12 +151,9 @@ func (t *table) exchange() {
 }
 
 func (t *table) gc() {
-	var cnt int
-
+	cnt := MinCacheSize
 	if n := t.fq.Len(); n < cnt {
 		cnt = n
-	} else {
-		cnt = n / 2
 	}
 	prev := t.fq.Back()
 	for e := prev; e != nil; e = prev {
