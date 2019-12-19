@@ -13,19 +13,15 @@ func (itr *backwardIterator) Close() error {
 }
 
 func (itr *backwardIterator) Next() error {
-	if len(itr.ks) > 0 {
-		itr.ks = itr.ks[1:]
-		itr.vs = itr.vs[1:]
-		itr.tss = itr.tss[1:]
-		if len(itr.ks) == 0 {
-			return itr.filter()
-		}
-		return nil
+	if itr.s {
+		itr.s = false
+		return itr.seek()
 	}
 	itr.itr.Next()
 	for itr.itr.Valid() {
-		if binary.BigEndian.Uint64(itr.itr.Key()[len(itr.itr.Key())-8:]) <= itr.ts && itr.itr.Value() != constant.Cancel {
-			return itr.filter()
+		if ts := binary.BigEndian.Uint64(itr.itr.Key()[len(itr.itr.Key())-8:]); ts <= itr.ts && itr.itr.Value() != constant.Cancel {
+			itr.s = true
+			return itr.filter(itr.itr.Key()[:len(itr.itr.Key())-8], ts)
 		}
 		if err := itr.itr.Next(); err != nil {
 			return err
@@ -35,37 +31,29 @@ func (itr *backwardIterator) Next() error {
 }
 
 func (itr *backwardIterator) Valid() bool {
-	if len(itr.ks) > 0 {
+	if itr.s {
 		return true
 	}
 	return itr.itr.Valid()
 }
 
 func (itr *backwardIterator) Key() []byte {
-	if len(itr.ks) > 0 {
-		return itr.ks[0]
-	}
-	return itr.itr.Key()[:len(itr.itr.Key())-8]
+	return itr.e.k
 }
 
 func (itr *backwardIterator) Value() uint64 {
-	if len(itr.vs) > 0 {
-		return itr.vs[0]
-	}
-	return itr.itr.Value()
+	return itr.e.v
 }
 
 func (itr *backwardIterator) Timestamp() uint64 {
-	if len(itr.tss) > 0 {
-		return itr.tss[0]
-	}
-	return binary.BigEndian.Uint64(itr.itr.Key()[len(itr.itr.Key())-8:])
+	return itr.e.ts
 }
 
 func (itr *backwardIterator) seek() error {
 	for itr.itr.Valid() {
-		if binary.BigEndian.Uint64(itr.itr.Key()[len(itr.itr.Key())-8:]) <= itr.ts && itr.itr.Value() != constant.Cancel {
-			return itr.filter()
+		if ts := binary.BigEndian.Uint64(itr.itr.Key()[len(itr.itr.Key())-8:]); ts <= itr.ts && itr.itr.Value() != constant.Cancel {
+			itr.s = true
+			return itr.filter(itr.itr.Key()[:len(itr.itr.Key())-8], ts)
 		}
 		if err := itr.itr.Next(); err != nil {
 			return err
@@ -74,27 +62,21 @@ func (itr *backwardIterator) seek() error {
 	return errmsg.ScanEnd
 }
 
-func (itr *backwardIterator) filter() error {
+func (itr *backwardIterator) filter(k []byte, ts uint64) error {
 	if !itr.itr.Valid() {
 		return errmsg.ScanEnd
 	}
-	k := itr.Key()
-	v := itr.Value()
-	ts := itr.Timestamp()
+	itr.e.k = k
+	itr.e.ts = ts
+	itr.e.v = itr.itr.Value()
 	for {
 		if err := itr.itr.Next(); err != nil {
 			return err
 		}
 		if !itr.itr.Valid() {
-			itr.ks = append(itr.ks, k)
-			itr.vs = append(itr.vs, v)
-			itr.tss = append(itr.tss, ts)
 			return nil
 		}
-		if bytes.Compare(k, itr.Key()) != 0 {
-			itr.ks = append(itr.ks, k)
-			itr.vs = append(itr.vs, v)
-			itr.tss = append(itr.tss, ts)
+		if bytes.Compare(k, itr.itr.Key()[:len(itr.itr.Key())-8]) != 0 {
 			return nil
 		}
 	}

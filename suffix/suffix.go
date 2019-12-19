@@ -17,9 +17,6 @@ func Find(k []byte, buf []byte) uint64 {
 }
 
 func Insert(k []byte, v uint64, w Writer, c cache.Cache, pg, par cache.Page) error {
-	if appendSuffix(k, v, pg) {
-		return nil
-	}
 	return load(w, pg, true).insert(k, v, c, par)
 }
 
@@ -53,6 +50,9 @@ func NewBackwardIterator(ks [][]byte, vs []uint64, prefix []byte, pg cache.Page)
 
 func (s *suffix) insert(k []byte, v uint64, c cache.Cache, par cache.Page) error {
 	e := &element{v, k}
+	if s.append(e) {
+		return s.writeBack()
+	}
 	if s.pg.Buffer()[2] == s.pg.Buffer()[3] {
 		return s.insertBySN(e, c, par)
 	}
@@ -454,31 +454,6 @@ func find(k []byte, buf []byte) int {
 	return 0
 }
 
-func appendSuffix(k []byte, v uint64, pg cache.Page) bool {
-	var i uint16
-
-	o := HeaderSize
-	buf := pg.Buffer()
-	for j := binary.LittleEndian.Uint16(buf); i < j; i++ {
-		n := int(binary.LittleEndian.Uint16(buf[o:]))
-		if bytes.Compare(k, buf[ElementHeaderSize+o:ElementHeaderSize+n+o]) == 0 {
-			binary.LittleEndian.PutUint64(buf[o+2:], v)
-			pg.Sync()
-			return true
-		}
-		o += ElementHeaderSize + n
-	}
-	if n := len(k) + ElementHeaderSize; n <= constant.BlockSize-o {
-		binary.LittleEndian.PutUint16(buf[o:], uint16(len(k)))
-		binary.LittleEndian.PutUint64(buf[o+2:], v)
-		copy(buf[o+ElementHeaderSize:], k)
-		binary.LittleEndian.PutUint16(buf, i+1)
-		pg.Sync()
-		return true
-	}
-	return false
-}
-
 func load(w Writer, pg cache.Page, update bool) *suffix {
 	var s suffix
 
@@ -486,20 +461,18 @@ func load(w Writer, pg cache.Page, update bool) *suffix {
 	s.pg = pg
 	o := HeaderSize
 	buf := pg.Buffer()
+	s.es = make([]*element, int(binary.LittleEndian.Uint16(buf)))
 	for i, j := 0, int(binary.LittleEndian.Uint16(buf)); i < j; i++ {
 		n := int(binary.LittleEndian.Uint16(buf[o:]))
-		e := &element{
-			off: binary.LittleEndian.Uint64(buf[o+2:]),
-		}
+		s.es[i] = new(element)
+		s.es[i].off = binary.LittleEndian.Uint64(buf[o+2:])
 		if update {
-			e.suff = dup(buf[ElementHeaderSize+o : ElementHeaderSize+n+o])
+			s.es[i].suff = dup(buf[ElementHeaderSize+o : ElementHeaderSize+n+o])
 		} else {
-			e.suff = buf[ElementHeaderSize+o : ElementHeaderSize+n+o]
+			s.es[i].suff = buf[ElementHeaderSize+o : ElementHeaderSize+n+o]
 		}
-		s.es = append(s.es, e)
 		o += ElementHeaderSize + n
 	}
-	sort.Sort(Elements(s.es))
 	s.free = constant.BlockSize - o
 	return &s
 }

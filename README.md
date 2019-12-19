@@ -50,7 +50,7 @@ type DB interface {
 	Set([]byte, []byte) error
 	Get([]byte) ([]byte, error)
 
-	NewTransaction() (Transaction, error)
+	NewTransaction(readOnly bool) (Transaction, error)
 }
 ```
 
@@ -70,8 +70,8 @@ type Iterator interface {
 	Close() error
 	Next() error
 	Valid() bool
-	Key() []byte
-	Value() ([]byte, error)
+	Key() []byte // can use outside
+	Value() ([]byte, error) // can use outside
 }
 
 ```

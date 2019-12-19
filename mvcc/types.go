@@ -25,19 +25,23 @@ type Iterator interface {
 	Timestamp() uint64
 }
 
+type entry struct {
+	k  []byte
+	v  uint64
+	ts uint64
+}
+
 type forwardIterator struct {
+	s   bool
+	e   *entry
 	ts  uint64
-	ks  [][]byte
-	vs  []uint64
-	tss []uint64
 	itr prefix.Iterator
 }
 
 type backwardIterator struct {
+	s   bool
+	e   *entry
 	ts  uint64
-	ks  [][]byte
-	vs  []uint64
-	tss []uint64
 	itr prefix.Iterator
 }
 

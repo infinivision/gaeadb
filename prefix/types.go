@@ -55,6 +55,8 @@ type forwardElement struct {
 
 type forwardIterator struct {
 	t *tree
+	k []byte
+	v uint64
 	s stack.Stack
 }
 
@@ -69,6 +71,8 @@ type backwardElement struct {
 
 type backwardIterator struct {
 	t *tree
+	k []byte
+	v uint64
 	s stack.Stack
 }
 

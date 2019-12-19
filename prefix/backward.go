@@ -37,6 +37,8 @@ func (itr *backwardIterator) Next() error {
 			if i == 0 {
 				itr.s.Pop()
 			} else {
+				itr.v = e.val
+				itr.k = e.pref
 				return nil
 			}
 		case S:
@@ -44,6 +46,8 @@ func (itr *backwardIterator) Next() error {
 				e.itr.Next()
 			}
 			if e.itr.Valid() {
+				itr.v = e.itr.Value()
+				itr.k = append(e.pref, e.itr.Key()...)
 				return nil
 			}
 			itr.s.Pop()
@@ -82,35 +86,30 @@ func (itr *backwardIterator) Key() []byte {
 	if itr.s.IsEmpty() {
 		return nil
 	}
-	e := itr.s.Peek().(*backwardElement)
-	switch e.typ {
-	case C:
-		return e.pref
-	case S:
-		return append(e.pref, e.itr.Key()...)
-	}
-	return nil
+	return itr.k
 }
 
 func (itr *backwardIterator) Value() uint64 {
 	if itr.s.IsEmpty() {
 		return 0
 	}
-	e := itr.s.Peek().(*backwardElement)
-	switch e.typ {
-	case C:
-		return e.val
-	case S:
-		return e.itr.Value()
-	}
-	return 0
+	return itr.v
 }
 
 func (itr *backwardIterator) seek() error {
-	if e := itr.s.Peek().(*backwardElement); e.typ != S && e.typ != C {
+	e := itr.s.Peek().(*backwardElement)
+	switch e.typ {
+	case S:
+		itr.v = e.itr.Value()
+		itr.k = append(e.pref, e.itr.Key()...)
+		return nil
+	case C:
+		itr.v = e.val
+		itr.k = e.pref
+		return nil
+	default:
 		return itr.Next()
 	}
-	return nil
 }
 
 func (itr *backwardIterator) down(k byte, par cache.Page, e *backwardElement) error {

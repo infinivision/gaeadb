@@ -20,14 +20,16 @@ func (itr *forwardIterator) Next() error {
 	if err := itr.itr.Next(); err != nil {
 		return err
 	}
-	key := string(itr.itr.Key())
-	for k, _ := range itr.tx.wmp {
-		if bytes.Compare([]byte(k), []byte(key)) < 0 {
-			itr.ks = LtPush([]byte(k), itr.ks)
+	if !itr.tx.ro {
+		key := string(itr.itr.Key())
+		for k, _ := range itr.tx.wmp {
+			if bytes.Compare([]byte(k), []byte(key)) < 0 {
+				itr.ks = LtPush([]byte(k), itr.ks)
+			}
 		}
-	}
-	if _, ok := itr.tx.wmp[key]; !ok {
-		itr.tx.rmp[key] = itr.itr.Timestamp()
+		if _, ok := itr.tx.wmp[key]; !ok {
+			itr.tx.rmp[key] = itr.itr.Timestamp()
+		}
 	}
 	return nil
 }
@@ -55,11 +57,13 @@ func (itr *forwardIterator) Value() ([]byte, error) {
 	default:
 		k = itr.itr.Key()
 	}
-	if v, ok := itr.tx.wmp[string(k)]; ok {
-		if v == nil {
-			return nil, errmsg.NotExist
+	if !itr.tx.ro {
+		if v, ok := itr.tx.wmp[string(k)]; ok {
+			if v == nil {
+				return nil, errmsg.NotExist
+			}
+			return v, nil
 		}
-		return v, nil
 	}
 	switch v := itr.itr.Value(); v {
 	case constant.Empty:

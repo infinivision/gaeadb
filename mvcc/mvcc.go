@@ -53,7 +53,7 @@ func (m *mvcc) NewForwardIterator(pref []byte, ts uint64) (Iterator, error) {
 	if err != nil {
 		return nil, err
 	}
-	itr := &forwardIterator{ts: ts, itr: fItr}
+	itr := &forwardIterator{ts: ts, itr: fItr, e: new(entry)}
 	if err := itr.seek(); err != nil {
 		itr.Close()
 		return nil, err
@@ -66,7 +66,7 @@ func (m *mvcc) NewBackwardIterator(pref []byte, ts uint64) (Iterator, error) {
 	if err != nil {
 		return nil, err
 	}
-	itr := &backwardIterator{ts: ts, itr: bItr}
+	itr := &backwardIterator{ts: ts, itr: bItr, e: new(entry)}
 	if err := itr.seek(); err != nil {
 		itr.Close()
 		return nil, err

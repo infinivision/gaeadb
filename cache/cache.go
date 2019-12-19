@@ -184,12 +184,9 @@ func (c *cache) exchange() {
 }
 
 func (c *cache) gc() {
-	var cnt int
-
+	cnt := MinCacheSize
 	if n := c.fq.Len(); n < cnt {
 		cnt = n
-	} else {
-		cnt = n / 2
 	}
 	prev := c.fq.Back()
 	for e := prev; e != nil; e = prev {
