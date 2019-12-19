@@ -1,8 +1,6 @@
 package suffix
 
 import (
-	"bytes"
-
 	"github.com/infinivision/gaeadb/cache"
 )
 
@@ -45,9 +43,3 @@ type suffix struct {
 	pg   cache.Page
 	es   []*element
 }
-
-type Elements []*element
-
-func (xs Elements) Len() int           { return len(xs) }
-func (xs Elements) Swap(i, j int)      { xs[i], xs[j] = xs[j], xs[i] }
-func (xs Elements) Less(i, j int) bool { return bytes.Compare(xs[i].suff, xs[j].suff) < 0 }
