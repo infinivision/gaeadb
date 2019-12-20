@@ -22,7 +22,7 @@ const (
 
 const (
 	FreeMultiples = 10
-	ColdMultiples = 200
+	ColdMultiples = 100
 	MinCacheSize  = 2000
 )
 

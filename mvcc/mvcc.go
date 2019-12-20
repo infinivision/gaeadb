@@ -17,6 +17,13 @@ func (m *mvcc) Close() error {
 	return m.t.Close()
 }
 
+func (m *mvcc) Exist(k []byte, ts uint64) bool {
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, ts)
+	_, err := m.t.Get(append(k, buf...))
+	return err == nil
+}
+
 func (m *mvcc) Get(k []byte, ts uint64) (uint64, uint64, error) {
 	itr, err := m.t.NewBackwardIterator(k)
 	if err != nil {

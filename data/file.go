@@ -31,6 +31,16 @@ func (f *file) read(o int64) ([]byte, error) {
 	return read(f.fp, o+HeaderSize, int(binary.LittleEndian.Uint16(h)))
 }
 
+func (f *file) load(o int64, size int) ([]byte, error) {
+	if size > constant.MaxLoadDataSize {
+		size = constant.MaxLoadDataSize
+	}
+	if size > int(int64(f.size)-o) {
+		size = int(int64(f.size) - o)
+	}
+	return read(f.fp, o, size)
+}
+
 func (f *file) alloc(size uint64) (uint64, error) {
 	curr := f.size
 	if curr+size > constant.MaxDataFileSize {

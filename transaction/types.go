@@ -28,14 +28,20 @@ type Iterator interface {
 	Value() ([]byte, error)
 }
 
-type forwardIterator struct {
+type kvList struct {
 	ks  [][]byte
+	mp  map[string][]byte
+	omp map[string]uint64
+}
+
+type forwardIterator struct {
+	kv  *kvList
 	tx  *transaction
 	itr mvcc.Iterator
 }
 
 type backwardIterator struct {
-	ks  [][]byte
+	kv  *kvList
 	tx  *transaction
 	itr mvcc.Iterator
 }

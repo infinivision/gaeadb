@@ -70,6 +70,16 @@ func (d *data) Read(o uint64) ([]byte, error) {
 	return nil, errmsg.NotExist
 }
 
+func (d *data) Load(o uint64, size int) ([]byte, error) {
+	for i, j := 0, len(d.fs); i < j; i++ {
+		if o < d.fs[i].size {
+			return d.fs[i].load(int64(o), size)
+		}
+		o -= d.fs[i].size
+	}
+	return nil, errmsg.NotExist
+}
+
 func (d *data) Write(o uint64, data []byte) error {
 	data = append(header(data), data...)
 	for i, j := 0, len(d.fs); i < j; i++ {

@@ -8,6 +8,7 @@ import (
 type MVCC interface {
 	Close() error
 
+	Exist([]byte, uint64) bool
 	Del([]byte, uint64, suffix.Writer) error
 	Get([]byte, uint64) (uint64, uint64, error)
 	Set([]byte, uint64, uint64, suffix.Writer) error

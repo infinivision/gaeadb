@@ -1,7 +1,6 @@
 package transaction
 
 import (
-	"bytes"
 	"encoding/binary"
 	"sync/atomic"
 
@@ -212,20 +211,15 @@ func (tx *transaction) NewForwardIterator(pref []byte) (Iterator, error) {
 	if itr, err := tx.m.NewForwardIterator(pref, tx.rts); err != nil {
 		return nil, err
 	} else {
-		if !tx.ro {
-			var ks [][]byte
-			key := string(itr.Key())
-			for k, _ := range tx.wmp {
-				if bytes.Compare([]byte(k), []byte(key)) < 0 {
-					ks = LtPush([]byte(k), ks)
-				}
-			}
-			if _, ok := tx.wmp[key]; !ok {
-				tx.rmp[key] = itr.Timestamp()
-			}
-			return &forwardIterator{ks, tx, itr}, nil
+		fitr := &forwardIterator{
+			tx:  tx,
+			itr: itr,
+			kv: &kvList{
+				mp:  make(map[string][]byte),
+				omp: make(map[string]uint64),
+			},
 		}
-		return &forwardIterator{nil, tx, itr}, nil
+		return fitr, fitr.seek()
 	}
 }
 
@@ -233,20 +227,15 @@ func (tx *transaction) NewBackwardIterator(pref []byte) (Iterator, error) {
 	if itr, err := tx.m.NewBackwardIterator(pref, tx.rts); err != nil {
 		return nil, err
 	} else {
-		if !tx.ro {
-			var ks [][]byte
-			key := string(itr.Key())
-			for k, _ := range tx.wmp {
-				if bytes.Compare([]byte(k), []byte(key)) > 0 {
-					ks = GtPush([]byte(k), ks)
-				}
-			}
-			if _, ok := tx.wmp[key]; !ok {
-				tx.rmp[key] = itr.Timestamp()
-			}
-			return &backwardIterator{ks, tx, itr}, nil
+		bitr := &forwardIterator{
+			tx:  tx,
+			itr: itr,
+			kv: &kvList{
+				mp:  make(map[string][]byte),
+				omp: make(map[string]uint64),
+			},
 		}
-		return &backwardIterator{nil, tx, itr}, nil
+		return bitr, bitr.seek()
 	}
 }
 
