@@ -10,6 +10,11 @@ const (
 	Cancel = iota // must be zero
 	Delete
 	Empty
+	Cache
+)
+
+const (
+	PreLoad = 100
 )
 
 const (
@@ -17,6 +22,7 @@ const (
 	MaxValueSize       = 1 << 16 // 64KB
 	MaxTransactionSize = 1 << 26 // 64MB
 	MaxDataFileSize    = 1 << 40 // 1TB
+	MaxLoadDataSize    = 1 << 10 // 1KB
 )
 
 const (

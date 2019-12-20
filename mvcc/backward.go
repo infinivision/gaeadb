@@ -18,16 +18,7 @@ func (itr *backwardIterator) Next() error {
 		return itr.seek()
 	}
 	itr.itr.Next()
-	for itr.itr.Valid() {
-		if ts := binary.BigEndian.Uint64(itr.itr.Key()[len(itr.itr.Key())-8:]); ts <= itr.ts && itr.itr.Value() != constant.Cancel {
-			itr.s = true
-			return itr.filter(itr.itr.Key()[:len(itr.itr.Key())-8], ts)
-		}
-		if err := itr.itr.Next(); err != nil {
-			return err
-		}
-	}
-	return errmsg.ScanEnd
+	return itr.seek()
 }
 
 func (itr *backwardIterator) Valid() bool {

@@ -20,6 +20,8 @@ type Data interface {
 	Read(uint64) ([]byte, error)
 	Write(uint64, []byte) error
 	Alloc([]byte) (uint64, error)
+
+	Load(uint64, int) ([]byte, error)
 }
 
 type file struct {

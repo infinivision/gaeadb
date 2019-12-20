@@ -51,15 +51,19 @@ func recoverFromCKPT(dir string, head, last int, d data.Data, m mvcc.MVCC, c cac
 				for k, v := range r.mp {
 					switch {
 					case v == nil:
-						if err := m.Del([]byte(k), r.ts, &recoverWriter{}); err != nil {
-							return 0, err
+						if !m.Exist([]byte(k), r.ts) {
+							if err := m.Del([]byte(k), r.ts, &recoverWriter{}); err != nil {
+								return 0, err
+							}
 						}
 					default:
 						if err := d.Write(os[0], v); err != nil {
 							return 0, err
 						}
-						if err := m.Set([]byte(k), os[0], r.ts, &recoverWriter{}); err != nil {
-							return 0, err
+						if !m.Exist([]byte(k), r.ts) {
+							if err := m.Set([]byte(k), os[0], r.ts, &recoverWriter{}); err != nil {
+								return 0, err
+							}
 						}
 						os = os[1:]
 					}
@@ -73,8 +77,10 @@ func recoverFromCKPT(dir string, head, last int, d data.Data, m mvcc.MVCC, c cac
 					}
 				}
 				for k, _ := range r.mp {
-					if err := m.Set([]byte(k), constant.Cancel, r.ts, &recoverWriter{}); err != nil {
-						return 0, err
+					if m.Exist([]byte(k), r.ts) {
+						if err := m.Set([]byte(k), constant.Cancel, r.ts, &recoverWriter{}); err != nil {
+							return 0, err
+						}
 					}
 				}
 			}
@@ -98,15 +104,19 @@ func recoverFromStart(dir string, head, last int, d data.Data, m mvcc.MVCC, c ca
 				for k, v := range r.mp {
 					switch {
 					case v == nil:
-						if err := m.Del([]byte(k), r.ts, &recoverWriter{}); err != nil {
-							return 0, err
+						if !m.Exist([]byte(k), r.ts) {
+							if err := m.Del([]byte(k), r.ts, &recoverWriter{}); err != nil {
+								return 0, err
+							}
 						}
 					default:
 						if err := d.Write(os[0], v); err != nil {
 							return 0, err
 						}
-						if err := m.Set([]byte(k), os[0], r.ts, &recoverWriter{}); err != nil {
-							return 0, err
+						if !m.Exist([]byte(k), r.ts) {
+							if err := m.Set([]byte(k), os[0], r.ts, &recoverWriter{}); err != nil {
+								return 0, err
+							}
 						}
 						os = os[1:]
 					}
@@ -120,8 +130,10 @@ func recoverFromStart(dir string, head, last int, d data.Data, m mvcc.MVCC, c ca
 					}
 				}
 				for k, _ := range r.mp {
-					if err := m.Set([]byte(k), constant.Cancel, r.ts, &recoverWriter{}); err != nil {
-						return 0, err
+					if m.Exist([]byte(k), r.ts) {
+						if err := m.Set([]byte(k), constant.Cancel, r.ts, &recoverWriter{}); err != nil {
+							return 0, err
+						}
 					}
 				}
 			}
