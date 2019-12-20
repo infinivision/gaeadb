@@ -36,7 +36,7 @@ func main() {
 		}
 	}
 	{
-		tx, err := db.NewTransaction()
+		tx, err := db.NewTransaction(false)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -54,7 +54,7 @@ func main() {
 		itr.Close()
 	}
 	{
-		tx, err := db.NewTransaction()
+		tx, err := db.NewTransaction(false)
 		if err != nil {
 			log.Fatal(err)
 		}
