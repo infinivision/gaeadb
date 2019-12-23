@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/infinivision/gaeadb/sum"
+	"golang.org/x/sys/unix"
 )
 
 func (w *walWriter) Close() error {
@@ -46,7 +47,14 @@ func (w *walWriter) Append(record []byte) error {
 			f.close()
 		}
 	}()
-	return f.flush()
+	switch record[0] {
+	case CT:
+		return unix.Msync(f.buf, unix.MS_SYNC)
+	case EC:
+		return unix.Msync(f.buf, unix.MS_SYNC)
+	default:
+		return unix.Msync(f.buf, unix.MS_ASYNC)
+	}
 }
 
 func (w *walWriter) alloc(record []byte) (*file, int32, error) {
