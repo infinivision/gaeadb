@@ -1,6 +1,6 @@
 # gaeadb
 gaeadb is a pure Go Database engine designed by nnsgmsone. 
-The goal of the project is to provide a database engine for sql.
+The goal of the project is to provide a database engine for table or other complex data structures.
 
 ## Table of Contents
  * [Getting Started](#getting-started)
