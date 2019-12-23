@@ -116,11 +116,11 @@ func (itr *forwardIterator) seek() error {
 func (itr *forwardIterator) down(k byte, par cache.Page, e *forwardElement) error {
 	if e.typ == R {
 		e.cnt++
-		root, err := itr.t.c.Get(RootPage)
+		root, err := itr.t.c.Get(constant.RootPage)
 		if err != nil {
 			return err
 		}
-		le := itr.t.t.Get(uint64(RootPage) | uint64(k)<<constant.TypeOff)
+		le := itr.t.t.Get(uint64(constant.RootPage) | uint64(k)<<constant.TypeOff)
 		le.RLock()
 		pn, _ := branch(k, root.Buffer())
 		pg, err := itr.t.c.Get(pn)

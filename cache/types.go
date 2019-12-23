@@ -5,7 +5,9 @@ import (
 	"sync"
 
 	"github.com/infinivision/gaeadb/cache/scheduler"
+	"github.com/infinivision/gaeadb/constant"
 	"github.com/infinivision/gaeadb/disk"
+	"github.com/nnsgmsone/damrey/logger"
 )
 
 const (
@@ -51,10 +53,12 @@ type page struct {
 type cache struct {
 	n          int
 	mp         *sync.Map
+	log        logger.Log
 	hq, cq, fq *list.List
 	pch        chan *page
 	ch         chan struct{}
 	sched      scheduler.Scheduler
+	ps         [constant.Preallocate]*page
 }
 
 func (pg *page) Sync() {

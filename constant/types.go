@@ -7,6 +7,11 @@ var (
 )
 
 const (
+	RootPage    = int64(0)
+	Preallocate = int64(257)
+)
+
+const (
 	Cancel = iota // must be zero
 	Delete
 	Empty
