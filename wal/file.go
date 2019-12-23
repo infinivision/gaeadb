@@ -15,7 +15,7 @@ func (f *file) close() error {
 }
 
 func (f *file) flush() error {
-	return unix.Msync(f.buf, 0)
+	return unix.Msync(f.buf, unix.MS_SYNC)
 }
 
 func (f *file) alloc(size int32) (int32, error) {
