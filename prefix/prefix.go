@@ -338,7 +338,7 @@ func (t *tree) newBackwardElement(s stack.Stack, typ int, pn int64, rsrc *resour
 //  k   - suffix
 //  pg  - parent node
 func (t *tree) down(k []byte, update bool) (int, int64, locker.Locker, []byte, cache.Page, error) {
-	pn, typ := RootPage, constant.PN
+	pn, typ := constant.RootPage, constant.PN
 	le := t.t.Get(uint64(pn) | uint64(k[0])<<constant.TypeOff)
 	switch {
 	case update:

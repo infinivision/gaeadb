@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/infinivision/gaeadb/cache/scheduler"
+	"github.com/infinivision/gaeadb/constant"
 	"github.com/infinivision/gaeadb/disk"
 	"github.com/nnsgmsone/damrey/logger"
 )
@@ -16,6 +17,7 @@ func New(limit int, d disk.Disk, log logger.Log) *cache {
 		limit = MinCacheSize
 	}
 	return &cache{
+		log:   log,
 		mp:    new(sync.Map),
 		cq:    new(list.List),
 		hq:    new(list.List),
@@ -28,6 +30,15 @@ func New(limit int, d disk.Disk, log logger.Log) *cache {
 }
 
 func (c *cache) Run() {
+	{
+		for i := constant.RootPage; i < constant.Preallocate; i++ {
+			b, err := c.sched.Read(i)
+			if err != nil {
+				c.log.Fatalf("failed to load root page: %v\n", err)
+			}
+			c.ps[i] = &page{b: b, cp: c}
+		}
+	}
 	cnt := 0
 	freeSize := c.n * FreeMultiples
 	ticker := time.NewTicker(Cycle * time.Second)
@@ -60,12 +71,14 @@ func (c *cache) Flush() {
 }
 
 func (c *cache) Release(pg Page) {
-	atomic.AddInt32(&pg.(*page).n, -1)
+	if pg.PageNumber() != 0 {
+		atomic.AddInt32(&pg.(*page).n, -1)
+	}
 }
 
 func (c *cache) Get(pn int64) (Page, error) {
-	switch pn {
-	case -1:
+	switch {
+	case pn == -1:
 		b, err := c.sched.Read(pn)
 		if err != nil {
 			return nil, err
@@ -74,6 +87,8 @@ func (c *cache) Get(pn int64) (Page, error) {
 		c.mp.Store(pg.PageNumber(), pg)
 		c.pch <- pg
 		return pg, nil
+	case pn < constant.Preallocate:
+		return c.ps[pn], nil
 	default:
 		for {
 			if v, ok := c.mp.Load(pn); ok {

@@ -8,10 +8,6 @@ import (
 )
 
 const (
-	RootPage = int64(0)
-)
-
-const (
 	R = iota // root node
 	E        // entry of branch
 	P        // prefix node
