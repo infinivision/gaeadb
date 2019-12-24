@@ -3,6 +3,7 @@ package transaction
 import (
 	"encoding/binary"
 
+	"github.com/infinivision/gaeadb/cache"
 	"github.com/infinivision/gaeadb/data"
 	"github.com/infinivision/gaeadb/mvcc"
 	"github.com/infinivision/gaeadb/scheduler"
@@ -61,9 +62,25 @@ type transaction struct {
 	schd scheduler.Scheduler
 }
 
+type page struct {
+	s  bool
+	pg cache.Page
+}
+
 type walWriter struct {
 	ts uint64
 	w  wal.Writer
+	mp map[int64]*page
+}
+
+func (w *walWriter) NewPage(pg cache.Page) {
+	w.mp[pg.PageNumber()] = &page{pg: pg}
+}
+
+func (w *walWriter) NewSyncPage(pg cache.Page) {
+	if pg, ok := w.mp[pg.PageNumber]; ok {
+		pg.s = true
+	}
 }
 
 func (w *walWriter) NewSuffix(end, start byte, pn, val uint64) error {

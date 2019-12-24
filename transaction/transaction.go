@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"sync/atomic"
 
+	"github.com/infinivision/gaeadb/cache"
 	"github.com/infinivision/gaeadb/constant"
 	"github.com/infinivision/gaeadb/data"
 	"github.com/infinivision/gaeadb/errmsg"
@@ -105,21 +106,26 @@ func (tx *transaction) Commit() error {
 			tx.log.Fatalf("transaction append record failed: %v\n", err)
 		}
 	}
+	w := &walWriter{
+		w:  tx.w,
+		ts: tx.wts,
+		mp: make(map[int64]cache.Page),
+	}
 	for _, k := range ks {
 		switch {
 		case tx.wmp[k] == nil:
-			if err := tx.m.Set([]byte(k), constant.Delete, tx.wts, &walWriter{tx.wts, tx.w}); err != nil {
+			if err := tx.m.Set([]byte(k), constant.Delete, tx.wts, w); err != nil {
 				tx.log.Fatalf("transaction del '%s' failed: %v\n", k, err)
 			}
 		case len(tx.wmp[k]) == 0:
-			if err := tx.m.Set([]byte(k), constant.Empty, tx.wts, &walWriter{tx.wts, tx.w}); err != nil {
+			if err := tx.m.Set([]byte(k), constant.Empty, tx.wts, w); err != nil {
 				tx.log.Fatalf("transaction set '%s' failed: %v\n", k, err)
 			}
 		default:
 			if err := tx.d.Write(os[0], tx.wmp[k]); err != nil {
 				tx.log.Fatalf("transaction write data of '%s' failed: %v\n", k, err)
 			}
-			if err := tx.m.Set([]byte(k), os[0], tx.wts, &walWriter{tx.wts, tx.w}); err != nil {
+			if err := tx.m.Set([]byte(k), os[0], tx.wts, w); err != nil {
 				tx.log.Fatalf("transaction set '%s' failed: %v\n", k, err)
 			}
 			os = os[1:]
@@ -131,6 +137,13 @@ func (tx *transaction) Commit() error {
 		binary.LittleEndian.PutUint64(log[1:], tx.wts)
 		if err = tx.w.Append(log); err != nil {
 			tx.log.Fatalf("transaction commit failed: %v\n", err)
+		}
+	}
+	{
+		for _, pg := range w.mp {
+			if pg.s {
+				pg.pg.Sync()
+			}
 		}
 	}
 	if err := tx.schd.Done(tx.wts); err != nil {

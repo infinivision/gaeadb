@@ -47,14 +47,7 @@ func (w *walWriter) Append(record []byte) error {
 			f.close()
 		}
 	}()
-	switch record[0] {
-	case CT:
-		return unix.Msync(f.buf, unix.MS_SYNC)
-	case EC:
-		return unix.Msync(f.buf, unix.MS_SYNC)
-	default:
-		return unix.Msync(f.buf, unix.MS_ASYNC)
-	}
+	return f.flush()
 }
 
 func (w *walWriter) alloc(record []byte) (*file, int32, error) {
